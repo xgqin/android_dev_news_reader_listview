@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">ListViewDemo</string>
+    <string name="search_hint">Search GGNews</string>
+    <string name="article_title">title</string>
+    <string name="article_subtitle">subtitle</string>
+    <string name="article_text">content</string>
+    <!-- Strings related to login -->
+    <string name="shared_preferences_file_name">sp_login.xml</string>
+    <string name="login_account_name">login_account_name</string>
+    <string name="login_password">login_password</string>
+    <string name="login_remember_password">login_remember_password</string>
+
+    <string name="appbar_search">Search</string>
+    <string name="appbar_delete">Delete</string>
+    <string name="appbar_favorite">Favorite</string>
+    <string name="appbar_refresh">Refresh</string>
+</resources>
