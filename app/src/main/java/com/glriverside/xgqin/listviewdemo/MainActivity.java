@@ -4,7 +4,6 @@ import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.ListView;
-import android.widget.SimpleAdapter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,13 +12,13 @@ import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String NEWS_TITLE = "news_title";
-    private static final String NEWS_AUTHOR = "news_author";
-
     private String[] titles = null;
     private String[] authors = null;
+    private TypedArray images;
 
-    private List<Map<String, String>> dataList = new ArrayList<>();
+    private List<News> newsList = new ArrayList<>();
+
+    private NewsAdapter newsAdapter = null;
     private ListView lvNewsList;
 
     @Override
@@ -31,12 +30,13 @@ public class MainActivity extends AppCompatActivity {
 
         initData();
 
-        SimpleAdapter simpleAdapter = new SimpleAdapter(
+        newsAdapter = new NewsAdapter(
                 MainActivity.this,
-                dataList, android.R.layout.simple_list_item_2,
-                new String[]{NEWS_TITLE, NEWS_AUTHOR},
-                new int[]{android.R.id.text1, android.R.id.text2});
-        lvNewsList.setAdapter(simpleAdapter);
+                R.layout.list_item,
+                newsList
+        );
+
+        lvNewsList.setAdapter(newsAdapter);
     }
 
     private void initData() {
@@ -44,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
 
         titles = getResources().getStringArray(R.array.titles);
         authors = getResources().getStringArray(R.array.authors);
+        images = getResources().obtainTypedArray(R.array.images);
 
         if (titles.length > authors.length) {
             length = authors.length;
@@ -52,11 +53,12 @@ public class MainActivity extends AppCompatActivity {
         }
 
         for (int i = 0; i < length; i++) {
-            Map map = new HashMap();
-            map.put(NEWS_TITLE, titles[i]);
-            map.put(NEWS_AUTHOR, authors[i]);
+            News news = new News();
+            news.setTitle(titles[i]);
+            news.setAuthor(authors[i]);
+            news.setImageId(images.getResourceId(i, 0));
 
-            dataList.add(map);
+            newsList.add(news);
         }
     }
 }
