@@ -1,5 +1,6 @@
 package com.glriverside.xgqin.listviewdemo;
 
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.res.TypedArray;
 import android.database.Cursor;
@@ -7,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -18,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -26,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
 
     private String[] titles = null;
     private String[] authors = null;
+    private String[] contents = null;
     private TypedArray images;
 
     private List<News> newsList = new ArrayList<>();
@@ -37,14 +41,17 @@ public class MainActivity extends AppCompatActivity {
 
     private ListView lvNewsList;
 
+    private FloatingActionButton fabRefresh = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         lvNewsList = findViewById(R.id.lv_news_list);
+        fabRefresh = findViewById(R.id.fab_refresh);
 
-        // initData();
+        initData();
 
         myDbOpenHelper = new MyDbOpenHelper(MainActivity.this);
         db = myDbOpenHelper.getReadableDatabase();
@@ -55,8 +62,7 @@ public class MainActivity extends AppCompatActivity {
                 null,
                 null,
                 null,
-                null
-                );
+                NewsContract.NewsEntry._ID + " DESC");
 
         cursorAdapter = new NewsCursorAdapter(MainActivity.this);
 
@@ -76,6 +82,37 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(detailIntent);
             }
         });
+
+        fabRefresh.setOnClickListener(new View.OnClickListener(){
+
+            @Override
+            public void onClick(View v) {
+                refreshData();
+            }
+        });
+    }
+
+    private void refreshData() {
+        Random random = new Random();
+        int index = random.nextInt(19);
+
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(NewsContract.NewsEntry.COLUMN_NAME_TITLE, titles[index]);
+        contentValues.put(NewsContract.NewsEntry.COLUMN_NAME_AUTHOR, authors[index]);
+        contentValues.put(NewsContract.NewsEntry.COLUMN_NAME_CONTENT, contents[index]);
+        contentValues.put(NewsContract.NewsEntry.COLUMN_NAME_IMAGE, images.getString(index));
+
+        db.insert(NewsContract.NewsEntry.TABLE_NAME, null, contentValues);
+        cursor = db.query(NewsContract.NewsEntry.TABLE_NAME,
+                null,
+                null,
+                null,
+                null,
+                null,
+                NewsContract.NewsEntry._ID + " DESC");
+
+        cursorAdapter.swapCursor(cursor);
+        cursorAdapter.notifyDataSetChanged();
     }
 
     private void initData() {
@@ -83,6 +120,7 @@ public class MainActivity extends AppCompatActivity {
 
         titles = getResources().getStringArray(R.array.titles);
         authors = getResources().getStringArray(R.array.authors);
+        contents = getResources().getStringArray(R.array.contents);
         images = getResources().obtainTypedArray(R.array.images);
 
         if (titles.length > authors.length) {
