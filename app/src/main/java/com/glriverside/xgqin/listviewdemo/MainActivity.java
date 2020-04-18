@@ -1,6 +1,10 @@
 package com.glriverside.xgqin.listviewdemo;
 
 import android.content.res.TypedArray;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.ListView;
@@ -19,6 +23,11 @@ public class MainActivity extends AppCompatActivity {
     private List<News> newsList = new ArrayList<>();
 
     private NewsAdapter newsAdapter = null;
+
+    private MyDbOpenHelper myDbOpenHelper = null;
+    private SQLiteDatabase db = null;
+    private Cursor cursor = null;
+
     private ListView lvNewsList;
 
     @Override
@@ -28,7 +37,41 @@ public class MainActivity extends AppCompatActivity {
 
         lvNewsList = findViewById(R.id.lv_news_list);
 
-        initData();
+        // initData();
+
+        myDbOpenHelper = new MyDbOpenHelper(MainActivity.this);
+        db = myDbOpenHelper.getReadableDatabase();
+
+        cursor = db.query(NewsContract.NewsEntry.TABLE_NAME,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+                );
+
+        int titleIndex = cursor.getColumnIndex(
+                NewsContract.NewsEntry.COLUMN_NAME_TITLE);
+        int authorIndex = cursor.getColumnIndex(
+                NewsContract.NewsEntry.COLUMN_NAME_AUTHOR);
+        int imageIndex = cursor.getColumnIndex(
+                NewsContract.NewsEntry.COLUMN_NAME_IMAGE);
+
+        while (cursor.moveToNext()) {
+            News news = new News();
+            String title = cursor.getString(titleIndex);
+            String author = cursor.getString(authorIndex);
+            String image = cursor.getString(imageIndex);
+
+            Bitmap bitmap = BitmapFactory.decodeStream(
+                    getClass().getResourceAsStream("/" + image));
+
+            news.setTitle(title);
+            news.setAuthor(author);
+            news.setImage(bitmap);
+            newsList.add(news);
+        }
 
         newsAdapter = new NewsAdapter(
                 MainActivity.this,

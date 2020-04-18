@@ -28,19 +28,37 @@ public class NewsAdapter extends ArrayAdapter<News> {
         News news = getItem(position);
         View view ;
 
-        view = LayoutInflater.from(getContext()).inflate(resourceId, parent, false);
-        TextView tvTitle  = view.findViewById(R.id.tv_title);
-        TextView tvAuthor = view.findViewById(R.id.tv_subtitle);
-        ImageView ivImage = view.findViewById(R.id.iv_image);
+        ViewHolder viewHolder;
 
-        tvTitle.setText(news.getTitle());
-        tvAuthor.setText(news.getAuthor());
-        ivImage.setImageResource(news.getImageId());
+        if (convertView == null) {
+            view = LayoutInflater.from(getContext()).inflate(resourceId, parent, false);
+
+            viewHolder = new ViewHolder();
+            viewHolder.tvTitle  = view.findViewById(R.id.tv_title);
+            viewHolder.tvAuthor = view.findViewById(R.id.tv_subtitle);
+            viewHolder.ivImage = view.findViewById(R.id.iv_image);
+
+            view.setTag(viewHolder);
+        } else {
+            view = convertView;
+            viewHolder = (ViewHolder) view.getTag();
+        }
+
+        viewHolder.tvTitle.setText(news.getTitle());
+        viewHolder.tvAuthor.setText(news.getAuthor());
 
         if (news.getImageId() != -1) {
-            ivImage.setImageResource(news.getImageId());
+            viewHolder.ivImage.setImageResource(news.getImageId());
+        } else {
+            viewHolder.ivImage.setImageBitmap(news.getImage());
         }
+
         return view;
     }
 
+    class ViewHolder {
+        TextView tvTitle;
+        TextView tvAuthor;
+        ImageView ivImage;
+    }
 }
