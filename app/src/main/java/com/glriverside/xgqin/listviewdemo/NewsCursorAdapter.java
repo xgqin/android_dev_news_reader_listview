@@ -58,12 +58,17 @@ public class NewsCursorAdapter extends CursorAdapter {
                 cursor.getColumnIndex(
                         NewsContract.NewsEntry.COLUMN_NAME_IMAGE));
 
+        final int newsId = cursor.getInt(
+                cursor.getColumnIndex(
+                        NewsContract.NewsEntry._ID));
+
         holder.tvTitle.setText(title);
         holder.tvAuthor.setText(author);
 
         Bitmap bitmap = BitmapFactory.decodeStream(getClass().getResourceAsStream("/" + imageResource));
         holder.ivImage.setImageBitmap(bitmap);
 
+        holder.tvTitle.setTag(newsId);
     }
 
     class ViewHolder {
