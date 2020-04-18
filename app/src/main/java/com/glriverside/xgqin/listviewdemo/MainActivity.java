@@ -22,8 +22,7 @@ public class MainActivity extends AppCompatActivity {
 
     private List<News> newsList = new ArrayList<>();
 
-    private NewsAdapter newsAdapter = null;
-
+    private NewsCursorAdapter cursorAdapter = null;
     private MyDbOpenHelper myDbOpenHelper = null;
     private SQLiteDatabase db = null;
     private Cursor cursor = null;
@@ -51,35 +50,10 @@ public class MainActivity extends AppCompatActivity {
                 null
                 );
 
-        int titleIndex = cursor.getColumnIndex(
-                NewsContract.NewsEntry.COLUMN_NAME_TITLE);
-        int authorIndex = cursor.getColumnIndex(
-                NewsContract.NewsEntry.COLUMN_NAME_AUTHOR);
-        int imageIndex = cursor.getColumnIndex(
-                NewsContract.NewsEntry.COLUMN_NAME_IMAGE);
+        cursorAdapter = new NewsCursorAdapter(MainActivity.this);
 
-        while (cursor.moveToNext()) {
-            News news = new News();
-            String title = cursor.getString(titleIndex);
-            String author = cursor.getString(authorIndex);
-            String image = cursor.getString(imageIndex);
-
-            Bitmap bitmap = BitmapFactory.decodeStream(
-                    getClass().getResourceAsStream("/" + image));
-
-            news.setTitle(title);
-            news.setAuthor(author);
-            news.setImage(bitmap);
-            newsList.add(news);
-        }
-
-        newsAdapter = new NewsAdapter(
-                MainActivity.this,
-                R.layout.list_item,
-                newsList
-        );
-
-        lvNewsList.setAdapter(newsAdapter);
+        cursorAdapter.swapCursor(cursor);
+        lvNewsList.setAdapter(cursorAdapter);
     }
 
     private void initData() {
