@@ -1,5 +1,7 @@
 package com.glriverside.xgqin.listviewdemo;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.res.TypedArray;
@@ -51,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
         lvNewsList = findViewById(R.id.lv_news_list);
         fabRefresh = findViewById(R.id.fab_refresh);
 
+
         initData();
 
         myDbOpenHelper = new MyDbOpenHelper(MainActivity.this);
@@ -87,6 +90,15 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
+                fabRefresh.animate()
+                        .rotation(-180)
+                        .setDuration(500)
+                        .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        fabRefresh.setRotation(0);
+                    }
+                });
                 refreshData();
             }
         });
@@ -110,6 +122,7 @@ public class MainActivity extends AppCompatActivity {
                 null,
                 null,
                 NewsContract.NewsEntry._ID + " DESC");
+
 
         cursorAdapter.swapCursor(cursor);
         cursorAdapter.notifyDataSetChanged();

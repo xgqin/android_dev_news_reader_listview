@@ -2,6 +2,7 @@ package com.glriverside.xgqin.listviewdemo;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
@@ -16,11 +17,17 @@ public class NewsCursorAdapter extends CursorAdapter {
     private Context mContext;
     private LayoutInflater mInflater;
 
+    private MyDbOpenHelper myDbOpenHelper = null;
+    private SQLiteDatabase db = null;
+
     public NewsCursorAdapter(Context context) {
         super(context, null, 0);
         mContext = context;
 
         mInflater = LayoutInflater.from(context);
+
+        myDbOpenHelper = new MyDbOpenHelper(mContext);
+        db = myDbOpenHelper.getReadableDatabase();
     }
 
     @Override
@@ -36,6 +43,7 @@ public class NewsCursorAdapter extends CursorAdapter {
         holder.tvTitle = itemView.findViewById(R.id.tv_title);
         holder.tvAuthor = itemView.findViewById(R.id.tv_subtitle);
         holder.ivImage = itemView.findViewById(R.id.iv_image);
+        holder.ivDelete = itemView.findViewById(R.id.iv_delete);
 
         itemView.setTag(holder);
 
@@ -43,7 +51,7 @@ public class NewsCursorAdapter extends CursorAdapter {
     }
 
     @Override
-    public void bindView(View view, Context context, Cursor cursor) {
+    public void bindView(View view, Context context, final Cursor cursor) {
         final ViewHolder holder = (ViewHolder) view.getTag();
 
         final String title = cursor.getString(
@@ -69,11 +77,32 @@ public class NewsCursorAdapter extends CursorAdapter {
         holder.ivImage.setImageBitmap(bitmap);
 
         holder.tvTitle.setTag(newsId);
+
+        holder.ivDelete.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                Integer id = Integer.parseInt(holder.tvTitle.getTag().toString());
+                db.delete(NewsContract.NewsEntry.TABLE_NAME,
+                        NewsContract.NewsEntry._ID + " = ?",
+                        new String[]{Integer.toString(id)});
+                Cursor newCursor = db.query(NewsContract.NewsEntry.TABLE_NAME,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        NewsContract.NewsEntry._ID + " DESC");
+
+                swapCursor(newCursor);
+                notifyDataSetChanged();
+            }
+        });
     }
 
     class ViewHolder {
         TextView tvTitle;
         TextView tvAuthor;
         ImageView ivImage;
+        ImageView ivDelete;
     }
 }

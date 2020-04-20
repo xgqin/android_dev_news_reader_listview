@@ -40,6 +40,16 @@
             android:paddingBottom="4dp"
             android:textColor="@android:color/secondary_text_light"
             style="@style/TextAppearance.AppCompat.Subhead"/>
+        <ImageView
+            android:id="@+id/iv_delete"
+            android:src="@drawable/ic_close_black_24dp"
+            android:layout_alignParentEnd="true"
+            android:layout_below="@id/tv_title"
+            android:paddingEnd="8dp"
+            android:paddingBottom="8dp"
+            android:clickable="true"
+            android:layout_width="24dp"
+            android:layout_height="24dp" />
     </RelativeLayout>
 </android.support.v7.widget.CardView>
 
