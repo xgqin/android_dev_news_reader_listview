@@ -11,6 +11,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -44,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
     private ListView lvNewsList;
 
     private FloatingActionButton fabRefresh = null;
+    private SwipeRefreshLayout swipeRefresh = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
 
         lvNewsList = findViewById(R.id.lv_news_list);
         fabRefresh = findViewById(R.id.fab_refresh);
-
+        swipeRefresh = findViewById(R.id.swipe_refresh);
 
         initData();
 
@@ -100,6 +102,14 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
                 refreshData();
+            }
+        });
+
+        swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                refreshData();
+                swipeRefresh.setRefreshing(false);
             }
         });
     }
