@@ -2,14 +2,18 @@ package com.glriverside.xgqin.listviewdemo;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.app.LoaderManager;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.content.Loader;
 import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -25,7 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>{
 
     public static final String NEWS_ID = "news_id";
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -38,14 +42,16 @@ public class MainActivity extends AppCompatActivity {
     private List<News> newsList = new ArrayList<>();
 
     private NewsCursorAdapter cursorAdapter = null;
-    private MyDbOpenHelper myDbOpenHelper = null;
+
+    private MyDbOpenHelper myDbHelper = null;
     private SQLiteDatabase db = null;
-    private Cursor cursor = null;
 
     private ListView lvNewsList;
 
     private FloatingActionButton fabRefresh = null;
     private SwipeRefreshLayout swipeRefresh = null;
+
+    private static final int QUERY_LOADER_ID = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,21 +64,14 @@ public class MainActivity extends AppCompatActivity {
 
         initData();
 
-        myDbOpenHelper = new MyDbOpenHelper(MainActivity.this);
-        db = myDbOpenHelper.getReadableDatabase();
-
-        cursor = db.query(NewsContract.NewsEntry.TABLE_NAME,
-                null,
-                null,
-                null,
-                null,
-                null,
-                NewsContract.NewsEntry._ID + " DESC");
+        myDbHelper = new MyDbOpenHelper(MainActivity.this);
+        db = myDbHelper.getWritableDatabase();
 
         cursorAdapter = new NewsCursorAdapter(MainActivity.this);
 
-        cursorAdapter.swapCursor(cursor);
+        cursorAdapter.swapCursor(null);
         lvNewsList.setAdapter(cursorAdapter);
+
         lvNewsList.setOnItemClickListener(new ListView.OnItemClickListener(){
 
             @Override
@@ -87,6 +86,8 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(detailIntent);
             }
         });
+
+        getLoaderManager().initLoader(QUERY_LOADER_ID, null, this);
 
         fabRefresh.setOnClickListener(new View.OnClickListener(){
 
@@ -112,6 +113,7 @@ public class MainActivity extends AppCompatActivity {
                 swipeRefresh.setRefreshing(false);
             }
         });
+
     }
 
     private void refreshData() {
@@ -125,17 +127,8 @@ public class MainActivity extends AppCompatActivity {
         contentValues.put(NewsContract.NewsEntry.COLUMN_NAME_IMAGE, images.getString(index));
 
         db.insert(NewsContract.NewsEntry.TABLE_NAME, null, contentValues);
-        cursor = db.query(NewsContract.NewsEntry.TABLE_NAME,
-                null,
-                null,
-                null,
-                null,
-                null,
-                NewsContract.NewsEntry._ID + " DESC");
 
-
-        cursorAdapter.swapCursor(cursor);
-        cursorAdapter.notifyDataSetChanged();
+        getLoaderManager().restartLoader(QUERY_LOADER_ID, null, this);
     }
 
     private void initData() {
@@ -160,5 +153,29 @@ public class MainActivity extends AppCompatActivity {
 
             newsList.add(news);
         }
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        switch (id) {
+            case QUERY_LOADER_ID:
+                return new NewsQueryAsyncCursorLoader(MainActivity.this);
+            default:
+                return null;
+        }
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        if (loader.getId() == QUERY_LOADER_ID) {
+            cursorAdapter.swapCursor(cursor);
+            cursorAdapter.notifyDataSetChanged();
+            swipeRefresh.setRefreshing(false);
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+
     }
 }
