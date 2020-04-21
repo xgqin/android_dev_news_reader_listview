@@ -6,7 +6,10 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 public class DetailActivity extends AppCompatActivity {
@@ -18,14 +21,20 @@ public class DetailActivity extends AppCompatActivity {
     private Cursor cursor = null;
 
     private String selection = NewsContract.NewsEntry._ID + " = ?";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
 
-        TextView tvTitle = findViewById(R.id.article_title);
         TextView tvAuthor = findViewById(R.id.article_subtitle);
         TextView tvContent = findViewById(R.id.article_text);
+        ImageView ivFrontImage = findViewById(R.id.iv_front_image);
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        CollapsingToolbarLayout ctl = findViewById(R.id.collapsingToolBar);
+
+        setSupportActionBar(toolbar);
 
         Intent intent = getIntent();
 
@@ -63,9 +72,10 @@ public class DetailActivity extends AppCompatActivity {
                 Bitmap bitmap = BitmapFactory.decodeStream(
                         getClass().getResourceAsStream("/" + image));
 
-                tvTitle.setText(title);
+                ctl.setTitle(title);
                 tvAuthor.setText(author);
                 tvContent.setText(content);
+                ivFrontImage.setImageBitmap(bitmap);
             }
         }
     }
