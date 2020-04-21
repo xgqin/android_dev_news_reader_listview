@@ -48,8 +48,23 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     private FloatingActionButton fabRefresh = null;
     private SwipeRefreshLayout swipeRefresh = null;
 
+    private MyDbOpenHelper dbOpenHelper = null;
+    private SQLiteDatabase db = null;
+
     private static final int QUERY_LOADER_ID = 0;
     private static final int ADD_LOADER_ID = 1;
+    private static final int DELETE_LOADER_ID = 2;
+
+    private NewsCursorAdapter.OnItemDeletedListener listener = new NewsCursorAdapter.OnItemDeletedListener() {
+        @Override
+        public void onDeleted(Integer id) {
+            Bundle args = new Bundle();
+            args.putInt(NewsContract.NewsEntry._ID, id);
+
+            getLoaderManager().restartLoader(DELETE_LOADER_ID, args, MainActivity.this);
+            getLoaderManager().restartLoader(QUERY_LOADER_ID, null, MainActivity.this);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +77,12 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
         initData();
 
+        dbOpenHelper = new MyDbOpenHelper(MainActivity.this);
+        db = dbOpenHelper.getWritableDatabase();
+
         cursorAdapter = new NewsCursorAdapter(MainActivity.this);
+
+        cursorAdapter.setOnItemDeletedListener(listener);
 
         cursorAdapter.swapCursor(null);
         lvNewsList.setAdapter(cursorAdapter);
@@ -153,9 +173,11 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         switch (id) {
             case QUERY_LOADER_ID:
-                return new NewsQueryAsyncCursorLoader(MainActivity.this);
+                return new NewsQueryAsyncCursorLoader(MainActivity.this, db);
             case ADD_LOADER_ID:
-                return new NewsAddAsyncCursorLoader(MainActivity.this, args);
+                return new NewsAddAsyncCursorLoader(MainActivity.this, args, db);
+            case DELETE_LOADER_ID:
+                return new NewsDeleteAsyncCursorLoader(MainActivity.this, args, db);
             default:
                 return null;
         }

@@ -10,9 +10,12 @@ public class NewsQueryAsyncCursorLoader extends CursorLoader {
     private Context mContext;
     private final static String TAG = NewsQueryAsyncCursorLoader.class.getSimpleName();
 
-    public NewsQueryAsyncCursorLoader(Context context) {
+    private SQLiteDatabase db;
+
+    public NewsQueryAsyncCursorLoader(Context context, SQLiteDatabase db) {
         super(context);
         mContext = context;
+        this.db = db;
     }
 
     @Override
@@ -22,8 +25,6 @@ public class NewsQueryAsyncCursorLoader extends CursorLoader {
 
     @Override
     public Cursor loadInBackground() {
-        MyDbOpenHelper dbOpenHelper = new MyDbOpenHelper(mContext);
-        SQLiteDatabase db = dbOpenHelper.getReadableDatabase();
         Cursor cursor = db.query(
                 NewsContract.NewsEntry.TABLE_NAME,
                 null,

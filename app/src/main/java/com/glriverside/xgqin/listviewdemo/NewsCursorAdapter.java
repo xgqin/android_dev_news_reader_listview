@@ -17,17 +17,21 @@ public class NewsCursorAdapter extends CursorAdapter {
     private Context mContext;
     private LayoutInflater mInflater;
 
-    private MyDbOpenHelper myDbOpenHelper = null;
-    private SQLiteDatabase db = null;
+    private OnItemDeletedListener listener = null;
+
+    public interface OnItemDeletedListener {
+        public void onDeleted(Integer id);
+    }
 
     public NewsCursorAdapter(Context context) {
         super(context, null, 0);
         mContext = context;
 
         mInflater = LayoutInflater.from(context);
+    }
 
-        myDbOpenHelper = new MyDbOpenHelper(mContext);
-        db = myDbOpenHelper.getReadableDatabase();
+    public void setOnItemDeletedListener(NewsCursorAdapter.OnItemDeletedListener listener) {
+        this.listener = listener;
     }
 
     @Override
@@ -82,19 +86,10 @@ public class NewsCursorAdapter extends CursorAdapter {
             @Override
             public void onClick(View v) {
                 Integer id = Integer.parseInt(holder.tvTitle.getTag().toString());
-                db.delete(NewsContract.NewsEntry.TABLE_NAME,
-                        NewsContract.NewsEntry._ID + " = ?",
-                        new String[]{Integer.toString(id)});
-                Cursor newCursor = db.query(NewsContract.NewsEntry.TABLE_NAME,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        NewsContract.NewsEntry._ID + " DESC");
 
-                swapCursor(newCursor);
-                notifyDataSetChanged();
+                if (listener != null) {
+                    listener.onDeleted(id);
+                }
             }
         });
     }
