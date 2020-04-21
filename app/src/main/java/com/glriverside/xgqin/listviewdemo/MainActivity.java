@@ -43,15 +43,13 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     private NewsCursorAdapter cursorAdapter = null;
 
-    private MyDbOpenHelper myDbHelper = null;
-    private SQLiteDatabase db = null;
-
     private ListView lvNewsList;
 
     private FloatingActionButton fabRefresh = null;
     private SwipeRefreshLayout swipeRefresh = null;
 
     private static final int QUERY_LOADER_ID = 0;
+    private static final int ADD_LOADER_ID = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,9 +61,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         swipeRefresh = findViewById(R.id.swipe_refresh);
 
         initData();
-
-        myDbHelper = new MyDbOpenHelper(MainActivity.this);
-        db = myDbHelper.getWritableDatabase();
 
         cursorAdapter = new NewsCursorAdapter(MainActivity.this);
 
@@ -120,14 +115,13 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         Random random = new Random();
         int index = random.nextInt(19);
 
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(NewsContract.NewsEntry.COLUMN_NAME_TITLE, titles[index]);
-        contentValues.put(NewsContract.NewsEntry.COLUMN_NAME_AUTHOR, authors[index]);
-        contentValues.put(NewsContract.NewsEntry.COLUMN_NAME_CONTENT, contents[index]);
-        contentValues.put(NewsContract.NewsEntry.COLUMN_NAME_IMAGE, images.getString(index));
+        Bundle args = new Bundle();
+        args.putString(NewsContract.NewsEntry.COLUMN_NAME_TITLE, titles[index]);
+        args.putString(NewsContract.NewsEntry.COLUMN_NAME_AUTHOR, authors[index]);
+        args.putString(NewsContract.NewsEntry.COLUMN_NAME_CONTENT, contents[index]);
+        args.putString(NewsContract.NewsEntry.COLUMN_NAME_IMAGE, images.getString(index));
 
-        db.insert(NewsContract.NewsEntry.TABLE_NAME, null, contentValues);
-
+        getLoaderManager().restartLoader(ADD_LOADER_ID, args, this);
         getLoaderManager().restartLoader(QUERY_LOADER_ID, null, this);
     }
 
@@ -160,6 +154,8 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         switch (id) {
             case QUERY_LOADER_ID:
                 return new NewsQueryAsyncCursorLoader(MainActivity.this);
+            case ADD_LOADER_ID:
+                return new NewsAddAsyncCursorLoader(MainActivity.this, args);
             default:
                 return null;
         }
