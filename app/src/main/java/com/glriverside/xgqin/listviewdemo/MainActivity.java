@@ -2,8 +2,10 @@ package com.glriverside.xgqin.listviewdemo;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.app.AlertDialog;
 import android.app.LoaderManager;
 import android.content.ContentValues;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
 import android.content.res.TypedArray;
@@ -14,7 +16,9 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.BottomSheetDialog;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -58,11 +62,29 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     private NewsCursorAdapter.OnItemDeletedListener listener = new NewsCursorAdapter.OnItemDeletedListener() {
         @Override
         public void onDeleted(Integer id) {
+
+            ConfirmDialogFragment confirmDialogFragment = new ConfirmDialogFragment();
+            confirmDialogFragment.setDialogClickListener(confirmDialogListener);
+            confirmDialogFragment.setNewsId(id);
+            confirmDialogFragment.show(getSupportFragmentManager(), "confirmDialog");
+        }
+    };
+
+    private ConfirmDialogFragment.ConfirmDialogListener confirmDialogListener = new ConfirmDialogFragment.ConfirmDialogListener() {
+        @Override
+        public void onDialogPositiveClick(ConfirmDialogFragment dialog) {
+
+            Integer newsId = dialog.getNewsId();
             Bundle args = new Bundle();
-            args.putInt(NewsContract.NewsEntry._ID, id);
+            args.putInt(NewsContract.NewsEntry._ID, newsId);
 
             getLoaderManager().restartLoader(DELETE_LOADER_ID, args, MainActivity.this);
             getLoaderManager().restartLoader(QUERY_LOADER_ID, null, MainActivity.this);
+        }
+
+        @Override
+        public void onDialogNegativeClick(ConfirmDialogFragment dialog) {
+
         }
     };
 

@@ -10,7 +10,11 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name="com.glriverside.xgqin.listviewdemo.DetailActivity"
-            android:theme="@style/DetailAppTheme"></activity>
+            android:theme="@style/DetailAppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.glriverside.xgqin.listviewdemo.MainActivity" />
+        </activity>
 
         <activity android:name="com.glriverside.xgqin.listviewdemo.MainActivity">
             <intent-filter>
