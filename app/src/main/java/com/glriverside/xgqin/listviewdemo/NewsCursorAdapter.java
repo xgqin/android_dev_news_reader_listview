@@ -19,6 +19,24 @@ public class NewsCursorAdapter extends CursorAdapter {
 
     private OnItemDeletedListener listener = null;
 
+    private static final int VIEW_TYPE_ONE = 0;
+    private static final int VIEW_TYPE_TWO = 1;
+    private static final int VIEW_TYPE_COUNT = 2;
+
+    @Override
+    public int getViewTypeCount() {
+        return VIEW_TYPE_COUNT;
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        if (position % 3 == 0) {
+            return VIEW_TYPE_TWO;
+        }
+
+        return VIEW_TYPE_ONE;
+    }
+
     public interface OnItemDeletedListener {
         public void onDeleted(Integer id);
     }
@@ -36,17 +54,33 @@ public class NewsCursorAdapter extends CursorAdapter {
 
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup viewGroup) {
-        final View itemView =
-                mInflater.inflate(
-                        R.layout.list_item,
-                        viewGroup,
-                        false
-                );
+        int position = cursor.getPosition();
+
+        final View itemView;
+
+        if (getItemViewType(position) == VIEW_TYPE_TWO) {
+            itemView =
+                    mInflater.inflate(
+                            R.layout.list_item,
+                            viewGroup,
+                            false
+                    );
+        }
+        else {
+            itemView =
+                    mInflater.inflate(
+                            R.layout.list_item_type_one,
+                            viewGroup,
+                            false
+                    );
+        }
 
         final  ViewHolder holder = new ViewHolder();
         holder.tvTitle = itemView.findViewById(R.id.tv_title);
         holder.tvAuthor = itemView.findViewById(R.id.tv_subtitle);
         holder.ivImage = itemView.findViewById(R.id.iv_image);
+        holder.ivImage2 = itemView.findViewById(R.id.iv_image2);
+        holder.ivImage3 = itemView.findViewById(R.id.iv_image3);
         holder.ivDelete = itemView.findViewById(R.id.iv_delete);
 
         itemView.setTag(holder);
@@ -80,6 +114,14 @@ public class NewsCursorAdapter extends CursorAdapter {
         Bitmap bitmap = BitmapFactory.decodeStream(getClass().getResourceAsStream("/" + imageResource));
         holder.ivImage.setImageBitmap(bitmap);
 
+        if (holder.ivImage2 != null) {
+            holder.ivImage2.setImageBitmap(bitmap);
+        }
+
+        if (holder.ivImage3 != null) {
+            holder.ivImage3.setImageBitmap(bitmap);
+        }
+
         holder.tvTitle.setTag(newsId);
 
         holder.ivDelete.setOnClickListener(new View.OnClickListener(){
@@ -98,6 +140,8 @@ public class NewsCursorAdapter extends CursorAdapter {
         TextView tvTitle;
         TextView tvAuthor;
         ImageView ivImage;
+        ImageView ivImage2;
+        ImageView ivImage3;
         ImageView ivDelete;
     }
 }
