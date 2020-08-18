@@ -18,6 +18,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetDialog;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -26,6 +27,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -62,11 +64,16 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     private NewsCursorAdapter.OnItemDeletedListener listener = new NewsCursorAdapter.OnItemDeletedListener() {
         @Override
         public void onDeleted(Integer id) {
+            Snackbar snackbar = Snackbar.make(findViewById(R.id.coordinatorLayout),
+                    "news item removed from database.",
+                    Snackbar.LENGTH_LONG);
+            snackbar.show();
 
-            ConfirmDialogFragment confirmDialogFragment = new ConfirmDialogFragment();
-            confirmDialogFragment.setDialogClickListener(confirmDialogListener);
-            confirmDialogFragment.setNewsId(id);
-            confirmDialogFragment.show(getSupportFragmentManager(), "confirmDialog");
+            Bundle args = new Bundle();
+            args.putInt(NewsContract.NewsEntry._ID, id);
+
+            getLoaderManager().restartLoader(DELETE_LOADER_ID, args, MainActivity.this);
+            getLoaderManager().restartLoader(QUERY_LOADER_ID, null, MainActivity.this);
         }
     };
 
